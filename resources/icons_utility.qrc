@@ -1,0 +1,9 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>icons/utility/003-light bulb.svg</file>
+	<file>icons/utility/005-thermometer.svg</file>
+	<file>icons/utility/009-modem.svg</file>
+    <file>icons/utility/014-faucet.svg</file>
+    <file>icons/utility/017-house.svg</file>
+</qresource>
+</RCC>

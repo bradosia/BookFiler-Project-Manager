@@ -1,0 +1,7 @@
+{
+  /* block style comments because
+     it allows you to comment out a block */
+  "dataservers" : "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/dataservers/F1DS9KoOKByvc0-uxyvoTV1UfQVVRJTC1QSS1Q/points",
+  "building_info" : "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/tables/F1BlbgZy4oKQ9kiBiZJTW7eugwJhSOEaMUUUyOuVv2CDalxgVVRJTC1BRlxBQ0VcVEFCTEVTW0JVSUxESU5HX0RBVEFd/data",
+  "CAANtoCoordinates" : "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/tables/F1BlbgZy4oKQ9kiBiZJTW7eugwaKgvLoXhX0GjDFptjwvTcQVVRJTC1BRlxDRUZTXFRBQkxFU1tMQVRfTE9OR19EQVRBXQ/data"
+}

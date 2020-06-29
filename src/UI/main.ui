@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>main</class>
+ <widget class="QMainWindow" name="main">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>UC Davis PI Web API Browser</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../resources/icons_utility.qrc">
+    <normaloff>:/icons/utility/003-light bulb.svg</normaloff>:/icons/utility/003-light bulb.svg</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="sizeConstraint">
+     <enum>QLayout::SetMaximumSize</enum>
+    </property>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionEnergy"/>
+   <addaction name="actionWater"/>
+   <addaction name="actionWiFi"/>
+   <addaction name="actionDiscover"/>
+   <addaction name="actionTemperature"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionEnergy">
+   <property name="icon">
+    <iconset resource="../../resources/icons_utility.qrc">
+     <normaloff>:/icons/utility/003-light bulb.svg</normaloff>:/icons/utility/003-light bulb.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Energy Usage</string>
+   </property>
+   <property name="toolTip">
+    <string>Energy Usage</string>
+   </property>
+  </action>
+  <action name="actionWater">
+   <property name="icon">
+    <iconset resource="../../resources/icons_utility.qrc">
+     <normaloff>:/icons/utility/014-faucet.svg</normaloff>:/icons/utility/014-faucet.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Water Usage</string>
+   </property>
+   <property name="toolTip">
+    <string>Water Usage</string>
+   </property>
+  </action>
+  <action name="actionWiFi">
+   <property name="icon">
+    <iconset resource="../../resources/icons_utility.qrc">
+     <normaloff>:/icons/utility/009-modem.svg</normaloff>:/icons/utility/009-modem.svg</iconset>
+   </property>
+   <property name="text">
+    <string>WiFi</string>
+   </property>
+   <property name="toolTip">
+    <string>WiFi</string>
+   </property>
+  </action>
+  <action name="actionFile">
+   <property name="text">
+    <string>File</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionDiscover">
+   <property name="icon">
+    <iconset resource="../../resources/icons_utility.qrc">
+     <normaloff>:/icons/utility/017-house.svg</normaloff>:/icons/utility/017-house.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Discover</string>
+   </property>
+   <property name="toolTip">
+    <string>Discover</string>
+   </property>
+  </action>
+  <action name="actionTemperature">
+   <property name="icon">
+    <iconset resource="../../resources/icons_utility.qrc">
+     <normaloff>:/icons/utility/005-thermometer.svg</normaloff>:/icons/utility/005-thermometer.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Temperature</string>
+   </property>
+   <property name="toolTip">
+    <string>Temperature</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../../resources/icons_utility.qrc"/>
+ </resources>
+ <connections/>
+</ui>

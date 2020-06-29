@@ -1,0 +1,11 @@
+{
+  /* block style comments because
+     it allows you to comment out a block */
+  "treeData" : {
+  	"hello" : 0,
+  	"hi" : {
+  		"hello" : "test",
+  		"array" : [567,4356,88]
+  	}
+  }
+}
