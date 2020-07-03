@@ -1,4 +1,4 @@
-# Bookfiler™ File Manager
+# Bookfiler™ Project Manager
 A QT5 pagram for file management.
 
 # Features

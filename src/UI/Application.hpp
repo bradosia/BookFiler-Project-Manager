@@ -1,11 +1,10 @@
 /*
- * @name UC Davis PI Web API Browser
+ * @name BookFiler Recognize
  * @author Branden Lee
  * @version 1.00
  * @license GNU LGPL v3
- * @brief Browser for UC Davis PI Web API data.
- *
- * Data from OSIsoft and UC Davis
+ * @brief Text recognition viewer, editor, and analyzer.
+
  * Icons and images owned by their respective owners
  */
 
@@ -15,7 +14,9 @@
 // c++
 #include <memory>
 
-// QT
+/* QT 5.13.2-1
+ * License: LGPLv3
+ */
 #include <QApplication>
 
 // MainWindow

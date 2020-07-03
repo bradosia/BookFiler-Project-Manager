@@ -1,10 +1,19 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>icons/file/copy.png</file>
-    <file>icons/file/cut.png</file>
-    <file>icons/file/new.png</file>
-    <file>icons/file/open.png</file>
-    <file>icons/file/paste.png</file>
-    <file>icons/file/save.png</file>
+    <file>icons/file/icons8-delete.svg</file>
+    <file>icons/file/icons8-document.svg</file>
+    <file>icons/file/icons8-file.svg</file>
+    <file>icons/file/icons8-folder.svg</file>
+    <file>icons/file/icons8-image-file.svg</file>
+    <file>icons/file/icons8-left-30.png</file>
+    <file>icons/file/icons8-menu.svg</file>
+    <file>icons/file/icons8-opened-folder.svg</file>
+    <file>icons/file/icons8-picture.svg</file>
+    <file>icons/file/icons8-pie-chart-30.png</file>
+    <file>icons/file/icons8-refresh.svg</file>
+    <file>icons/file/icons8-right-30.png</file>
+    <file>icons/file/icons8-search.svg</file>
+    <file>icons/file/icons8-unavailable.svg</file>
+    <file>icons/file/icons8-up-30.png</file>
 </qresource>
 </RCC>

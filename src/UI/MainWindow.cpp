@@ -1,14 +1,17 @@
 /*
- * @name UC Davis PI Web API Browser
+ * @name BookFiler Recognize
  * @author Branden Lee
  * @version 1.00
  * @license GNU LGPL v3
- * @brief Browser for UC Davis PI Web API data.
- *
- * Data from OSIsoft and UC Davis
+ * @brief Text recognition viewer, editor, and analyzer.
+
  * Icons and images owned by their respective owners
  */
 
+// C++
+#include <thread>
+
+// Local Project
 #include "MainWindow.hpp"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
@@ -18,147 +21,151 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   ui->setupUi(this);
   this->setObjectName("MainWindow");
 
-  /* Plugins
+  /* Load modules in another thread and let them appear as they load.
+   * This will give the illusion to the user that the load time is fast.
+   * A splash screen or loading bar will make the program start up seem slow.
+   *
+   * EDIT: can't do this because QT gives error:
+   * QObject: Cannot create children for a parent that is in a different thread.
    */
-  bradosia::PluginManager pluginManagerObj;
-  bradosia::SettingsManager settingsManagerObj;
-  pluginManagerObj.addPluginInterface<UCDPWAB::PluginInterface>("plugin");
-  pluginManagerObj.loadPlugins("plugins");
-  UCDPWAB_plugin =
-      pluginManagerObj.getPlugin<UCDPWAB::PluginInterface>("plugin");
-  if (UCDPWAB_plugin) {
-    printf("UCDPWAB PLUGIN FOUND\n");
+  modulesLoadedNum = 0;
+  modulesLoadedTotalNum = 6;
+  // std::thread loadModulesThread(&MainWindow::loadModules, this);
+  // loadModulesThread.join();
+  loadModules();
+
+  // TODO: Thread these
+  if (hocrEditModule) {
+    std::cout << "hocrEditModule->getWidget()" << std::endl;
+    hocrEditWidget = hocrEditModule->getWidget();
+    std::cout << "std::make_shared<RenderWidget>()" << std::endl;
+    renderWidget = std::make_shared<RenderWidget>();
+    renderWidget->renderFunction =
+        std::bind(&hocrEditModule::HocrEditWidget::render, hocrEditWidget,
+                  std::placeholders::_1);
+    renderWidget->initGraphicsFunction =
+        std::bind(&hocrEditModule::HocrEditWidget::initGraphics, hocrEditWidget,
+                  std::placeholders::_1);
+    // renderWidget->renderFunction();
+    // needed to prevent crashing on program exit
+    centralQWidgetPtrs.push_back(renderWidget);
+  }
+  hocrEditModuleLoaded();
+  recognizeModuleLoaded();
+
+  // TODO: Check if widgets need to be added on paint cycles
+  if (hocrEditModule) {
+    QSizePolicy policy = renderWidget->sizePolicy();
+    policy.setHorizontalStretch(2);
+    renderWidget->setSizePolicy(policy);
+    ui->horizontalSplitter->addWidget(renderWidget.get());
+  }
+}
+
+void MainWindow::loadModules() {
+#if MAIN_WINDOW_DEBUG
+  std::cout << "MainWindow::loadModules() BEGIN\n";
+#endif
+  settingsManagerPtr = std::make_shared<bradosia::SettingsManager>();
+  /* Module Load
+   */
+  moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
+  moduleManagerPtr->addModuleInterface<hocrEditModule::ModuleInterface>(
+      "hocrEditModule");
+  moduleManagerPtr->addModuleInterface<bookfiler::RecognizeInterface>(
+      "bookfilerRecognizeModule");
+  moduleManagerPtr->addModuleInterface<bookfiler::Http>("bookfilerHttpModule");
+  moduleManagerPtr->addModuleInterface<bookfiler::OcrInterface>(
+      "bookfilerOcrModule");
+  moduleManagerPtr->addModuleInterface<bookfiler::PdfInterface>(
+      "bookfilerPdfModule");
+  moduleManagerPtr->addModuleInterface<bookfiler::OcrDatabaseInterface>(
+      "textRecognizeDatabaseModule");
+  moduleManagerPtr->loadModules("modules");
+  std::cout << "getModule<hocrEditModule::ModuleInterface>" << std::endl;
+  hocrEditModule = moduleManagerPtr->getModule<hocrEditModule::ModuleInterface>(
+      "hocrEditModule");
+  std::cout << "getModule<bookfiler::RecognizeInterface>" << std::endl;
+  recognizeModule = moduleManagerPtr->getModule<bookfiler::RecognizeInterface>(
+      "bookfilerRecognizeModule");
+  std::cout << "getModule<bookfiler::Http>" << std::endl;
+  httpModule =
+      moduleManagerPtr->getModule<bookfiler::Http>("bookfilerHttpModule");
+  std::cout << "getModule<bookfiler::OcrInterface>" << std::endl;
+  ocrModule = moduleManagerPtr->getModule<bookfiler::OcrInterface>(
+      "bookfilerOcrModule");
+  std::cout << "getModule<bookfiler::PdfInterface>" << std::endl;
+  pdfModule = moduleManagerPtr->getModule<bookfiler::PdfInterface>(
+      "bookfilerPdfModule");
+  std::cout << "getModule<bookfiler::OcrDatabaseInterface>" << std::endl;
+  recognizeDatabaseModule =
+      moduleManagerPtr->getModule<bookfiler::OcrDatabaseInterface>(
+          "textRecognizeDatabaseModule");
+#if MAIN_WINDOW_DEBUG
+  std::cout << "MainWindow::loadModules() END\n";
+#endif
+}
+
+void MainWindow::hocrEditModuleLoaded() {
+  if (hocrEditModule) {
+    std::cout << "MainWindow::hocrEditModuleLoaded()" << std::endl;
     /* register widgets
      */
-    UCDPWAB_plugin->init();
-    std::shared_ptr<QWidget> UCDPWAB_Widget = UCDPWAB_plugin->getWidget();
-    centralQWidgetPtrs.push_back(UCDPWAB_Widget);
-    /* register settings
+    hocrEditModule->init();
+    /* register setting deploy
      */
-    rapidjson::Document pluginRequest;
-    std::unordered_map<std::string,
-                       std::function<void(rapidjson::Value & data)>>
-        pluginCallbackMap;
-    UCDPWAB_plugin->registerSettings(pluginRequest, pluginCallbackMap);
-    settingsManagerObj.merge(pluginRequest, pluginCallbackMap);
-
-    // Plain text tree start
-    // Open resource file
-    QFile file(":menu/default.txt");
-    file.open(QIODevice::ReadOnly);
-    // Add to Tree
-    // UCDPWAB_plugin->treeSetPlainText(file.readAll());
-    // Close file
-    file.close();
+    std::shared_ptr<rapidjson::Document> moduleRequest =
+        std::make_shared<rapidjson::Document>();
+    std::shared_ptr<std::unordered_map<
+        std::string, std::function<void(std::shared_ptr<rapidjson::Document>)>>>
+        moduleCallbackMap = std::make_shared<std::unordered_map<
+            std::string,
+            std::function<void(std::shared_ptr<rapidjson::Document>)>>>();
+    hocrEditModule->registerSettings(moduleRequest, moduleCallbackMap);
+    settingsManagerPtr->merge(moduleRequest, moduleCallbackMap);
+    // Did all modules load yet?
+    modulesLoadedNum += 5;
+    if (modulesLoadedNum == modulesLoadedTotalNum) {
+      allModulesLoaded();
+    }
   }
+}
 
+void MainWindow::recognizeModuleLoaded() {
+  if (recognizeModule) {
+    // Did all modules load yet?
+    modulesLoadedNum++;
+    if (modulesLoadedNum == modulesLoadedTotalNum) {
+      allModulesLoaded();
+    }
+  }
+}
+
+void MainWindow::allModulesLoaded() {
+  // Module Hookup
+  recognizeModule->setOcrModule(ocrModule);
+  recognizeModule->setPdfModule(pdfModule);
+  recognizeModel = recognizeModule->newModel();
+  /* SIGNALS AND SLOTS HOOKUP
+   */
+  ui->filesSelectedSignal.connect(
+      std::bind(&bookfiler::RecognizeModel::addPaths, recognizeModel.get(),
+                std::placeholders::_1));
+  ui->listItemActivatedSignal.connect(
+      std::bind(&bookfiler::RecognizeModel::requestRecognize,
+                recognizeModel.get(), std::placeholders::_1));
   /* Get the settings
    */
-  settingsManagerObj.deployFile(SETTINGS_FILE);
-
-  /* find the layout in the centralWidget
-   * add the plugin widgets to the layout
+  settingsManagerPtr->deployFile(SETTINGS_FILE);
+  /* SIGNALS AND SLOTS HOOKUP
    */
-  printf("===== DEBUG: ATTEMPTING TO FIND CENTRAL... =====\n");
-  QList<QHBoxLayout *> widgetCentralWidgetList =
-      this->findChildren<QHBoxLayout *>("horizontalLayout",
-                                        Qt::FindChildrenRecursively);
-  if (!widgetCentralWidgetList.empty()) {
-    printf("===== DEBUG: CENTRAL FOUND =====\n");
-    //QHBoxLayout* centralLayout = widgetCentralWidgetList.at(0);
-    for (auto widgetPtr : centralQWidgetPtrs) {
-      widgetCentralWidgetList.at(0)->addWidget(widgetPtr.get());
-    }
-  }
-
-  // QTreeView specific
-  if(!centralQWidgetPtrs.empty()){
-      std::shared_ptr<QTreeView> test = std::dynamic_pointer_cast<QTreeView>(centralQWidgetPtrs[0]);
-      test->expandAll();
-      test->setColumnWidth(0, 200);
-  }
-
-  if (UCDPWAB_plugin) {
-      //UCDPWAB_plugin->loadBuildingInfo();
-  }
-}
-
-void MainWindow::on_actionEnergy_triggered() {
-  /*std::string webID =
-      "A0EbgZy4oKQ9kiBiZJTW7eugwC6-3Qzx_"
-      "5RGrBZiQlqSuWw2sDVYNIPR1YODsG1RUyETgVVRJTC1BRlxDRUZTXFVDREFWSVNcQl"
-      "VJTE"
-      "RJTkdTXEFDQURFTUlDIFNVUkdFIEJVSUxESU5HXEVMRUNUUklDSVRZfERFTUFORA";
-  std::filesystem::path streamHTTP =
-      "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/streams/";
-  std::filesystem::path electricityHTTP = streamHTTP / webID / "recorded";
-  rapidjson::Document resJSON_Doc =
-      PWA_UCD::HTTPS_GET_JSON(electricityHTTP.string());
-
-  if (resJSON_Doc.IsObject()) {
-    for (rapidjson::Value::ConstMemberIterator itr = resJSON_Doc.MemberBegin();
-         itr != resJSON_Doc.MemberEnd(); ++itr) {
-      PWA_UCD::printJSON_iterator(itr, 0);
-    }
-  }*/
-}
-
-void MainWindow::on_actionDiscover_triggered() {
-  /*std::string HTTP_request =
-      "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/dataservers/"
-      "F1DS9KoOKByvc0-uxyvoTV1UfQVVRJTC1QSS1Q/points";
-  rapidjson::Document resJSON_Doc = PWA_UCD::HTTPS_GET_JSON(HTTP_request);
-
-  if (resJSON_Doc.IsObject()) {
-    for (rapidjson::Value::ConstMemberIterator itr = resJSON_Doc.MemberBegin();
-         itr != resJSON_Doc.MemberEnd(); ++itr) {
-      PWA_UCD::printJSON_iterator(itr, 0);
-    }
-  }*/
-}
-
-void MainWindow::on_actionWater_triggered() {
-  /*std::string webID =
-      "F1DSAAAAAAAAAAAAAAAAEiCt5wVUNELVBJLUlJUy5PVS5BRDMuVUNEQVZJUy5FRFU";
-  std::filesystem::path streamHTTP =
-      "https://ucd-pi-iis.ou.ad3.ucdavis.edu/piwebapi/streams/";
-  std::filesystem::path electricityHTTP = streamHTTP / webID / "recorded";
-  rapidjson::Document resJSON_Doc =
-      PWA_UCD::HTTPS_GET_JSON(electricityHTTP.string());
-
-  if (resJSON_Doc.IsObject()) {
-    for (rapidjson::Value::ConstMemberIterator itr = resJSON_Doc.MemberBegin();
-         itr != resJSON_Doc.MemberEnd(); ++itr) {
-      PWA_UCD::printJSON_iterator(itr, 0);
-    }
-  }*/
-}
-
-void MainWindow::on_actionWiFi_triggered() {
-  /*
-    std::string inputURIString, outputFileString;
-  PWA_UCD::getSettingsFile(SETTINGS_FILE, inputURIString,outputFileString);
-  rapidjson::Document resJSON_Doc =
-      PWA_UCD::HTTPS_GET_JSON(inputURIString);
-  std::ofstream ofs(outputFileString.c_str());
-  if ( !ofs.is_open() )
-      {
-     printf("ERROR: output file not found: %s\n",outputFileString.c_str());
-        return ;
-      }
-
-       rapidjson::OStreamWrapper osw { ofs };
-       rapidjson::PrettyWriter< rapidjson::OStreamWrapper> writer2 { osw };
-      resJSON_Doc.Accept( writer2 );
-      */
-}
-
-void MainWindow::on_actionTemperature_triggered() {
-  // Open resource file
-  QFile file(":menu/default.txt");
-  file.open(QIODevice::ReadOnly);
-  // Add to Tree
-  // UCD_PWA_Data_Widget->treeAddPlainText(file.readAll());
-  // Close file
-  file.close();
+  // Ui::main must inherit QObject for slot to work.
+  connect(ui->actionAbout, &QAction::triggered, ui.get(), &Ui::main::about);
+  connect(ui->actionOpen, &QAction::triggered, ui.get(),
+          &Ui::main::selectFiles);
+  connect(ui->listWidget, &QListWidget::itemDoubleClicked, ui.get(),
+          &Ui::main::listItemActivated);
+  recognizeModel->imageUpdateSignal.connect(hocrEditWidget->setImageSlot);
+  recognizeModel->textUpdateSignal.connect(hocrEditWidget->textUpdateSlot);
+  hocrEditWidget->updateSignal.connect(renderWidget->updateSlot);
 }

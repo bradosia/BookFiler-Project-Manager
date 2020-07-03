@@ -1,11 +1,50 @@
 {
-  /* block style comments because
-     it allows you to comment out a block */
-  "treeData" : {
-  	"hello" : 0,
-  	"hi" : {
-  		"hello" : "test",
-  		"array" : [567,4356,88]
-  	}
+  /* File Tree Pane Module default directory */
+  "defaultDirectory" : "C:\\Users\\admin\\Desktop\\new_folder1",
+  "FilesystemDatabase" : {
+  	"file_database_file_name" : "fileData.db",
+  	// for debug
+  	"insert_database" : [
+  		{
+  			"pathId" : "C:\\Users\\admin\\Desktop\\new_folder1\\boyy",
+  			"parentPathId" : "C:\\Users\\admin\\Desktop\\new_folder1",
+  			"drive" : "C",
+  			"fileType" : 1,
+  			"fileSize" : 2,
+  			"writeTimeLast" : 3,
+  			"flags" : 1,
+  		}, 
+  		{
+  			"pathId" : "C:\\Users\\admin\\Desktop\\new_folder1\\test",
+  			"parentPathId" : "C:\\Users\\admin\\Desktop\\new_folder1",
+  			"drive" : "C",
+  			"fileType" : 1,
+  			"fileSize" : 2,
+  			"writeTimeLast" : 3,
+  			"flags" : 1,
+  		}, 
+  		{
+  			"pathId" : "C:\\Users\\admin\\Desktop\\new_folder1\\ol",
+  			"parentPathId" : "C:\\Users\\admin\\Desktop\\new_folder1",
+  			"drive" : "C",
+  			"fileType" : 1,
+  			"fileSize" : 2,
+  			"writeTimeLast" : 3,
+  			"flags" : 1,
+  		}, 
+  		{
+  			"pathId" : "C:\\Users\\admin\\Desktop\\new_folder1\\lol",
+  			"parentPathId" : "C:\\Users\\admin\\Desktop\\new_folder1",
+  			"drive" : "C",
+  			"fileType" : 1,
+  			"fileSize" : 2,
+  			"writeTimeLast" : 3,
+  			"flags" : 1,
+  		}
+  	],
+  	"watch_directories" : [
+  		"C:\\Users\\admin\\Desktop\\new_folder1\\boyyyy",
+  		"/home/ubuntu/test"
+  	]
   }
 }
