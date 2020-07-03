@@ -24,3 +24,6 @@ message( STATUS "CMAKE_BINARY_DIR:           ${CMAKE_BINARY_DIR}" )
 message( STATUS "RELEASE_DIR:                ${RELEASE_DIR}" )
 message( STATUS "=============================================================================" )
 message( STATUS )
+
+add_subdirectory(FilesystemDatabase)
+add_subdirectory(FileTreePane)
