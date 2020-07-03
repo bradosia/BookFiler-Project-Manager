@@ -43,6 +43,8 @@ set(LINK_DIRECTORIES
 # MODULES
 add_subdirectory(src/modules/)
 add_subdirectory(third_party)
+add_subdirectory(third_party/Module-Manager)
+add_subdirectory(third_party/Settings-Manager)
 
 set(SOURCES ${SOURCES}
   src/UI/main.cpp
@@ -105,7 +107,7 @@ if(BUILD_SHARED_LIBS)
 endif(BUILD_SHARED_LIBS)
 
 if(BUILD_STATIC_LIBS)
-  set(lib_static_name ${PROJECT_NAME})
+  set(lib_static_name ${PROJECT_NAME}Static)
   set(lib_static_name_decorated ${lib_static_name}${LIBNAME_ADDITION})
   set(${PROJECT_NAME}_STATIC_LIBRARY ${lib_static_name_decorated} CACHE STRING "name of static library for ${PROJECT_NAME}" FORCE)
   message( STATUS "-- Building ${lib_static_name}" )
@@ -127,9 +129,6 @@ if(BUILD_SHARED_LIBS)
   if(UNIX)
       #set_property(TARGET ${lib_shared_name} PROPERTY POSITION_INDEPENDENT_CODE ON)
   endif()
-  write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${lib_shared_name}Version.cmake
-    VERSION ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion )
 
   # Compile Definitions
   target_compile_definitions(${lib_shared_name} PUBLIC ${SHARED_COMPILE_DEFINITIONS})
@@ -147,9 +146,6 @@ if(BUILD_STATIC_LIBS)
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
     ${INCLUDE_DIRECTORIES}
   )
-  write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/${lib_static_name}Version.cmake
-    VERSION ${PROJECT_VERSION}
-  COMPATIBILITY AnyNewerVersion )
 
   # Compile Definitions
   target_compile_definitions(${lib_static_name} PUBLIC ${STATIC_COMPILE_DEFINITIONS})
@@ -167,6 +163,8 @@ endif()
 SET(COPY_HEADERS ${HEADERS})
 list(TRANSFORM COPY_HEADERS PREPEND "${PROJECT_SOURCE_DIR}/")
 add_custom_command(TARGET ${COMMAND_TARGET} PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/third_party/Module-Manager"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/third_party/Settings-Manager"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
     COMMAND ${CMAKE_COMMAND} -E copy ${COPY_HEADERS} "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
