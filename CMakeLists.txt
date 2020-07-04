@@ -28,10 +28,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 set(INCLUDE_DIRECTORIES
+  include/
   third_party/rapidjson/include/
   third_party/Module-Manager/include/
   third_party/Settings-Manager/include/
-  src/modules
+  modules/
 )
 
 set(LINK_DIRECTORIES
@@ -41,10 +42,12 @@ set(LINK_DIRECTORIES
 )
 
 # MODULES
-add_subdirectory(src/modules/)
 add_subdirectory(third_party)
 add_subdirectory(third_party/Module-Manager)
 add_subdirectory(third_party/Settings-Manager)
+add_subdirectory(modules/)
+add_subdirectory(modules/BookFiler-Module-File-Tree-Pane)
+add_subdirectory(modules/BookFiler-Module-Filesystem-Database)
 
 set(SOURCES ${SOURCES}
   src/UI/main.cpp
@@ -68,7 +71,9 @@ set(RESOURCES ${RESOURCES}
   resources/icons_file.qrc
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+set(LINK_DIRECTORIES ${LINK_DIRECTORIES}
+  lib/
+)
 
 set(LIBRARIES ${LIBRARIES}
   # QT5
@@ -93,113 +98,39 @@ elseif(UNIX)
     )
 endif()
 
-set(SHARED_LINK_LIBRARIES ${LIBRARIES})
-set(STATIC_LINK_LIBRARIES ${LIBRARIES})
-
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
 link_directories(${LINK_DIRECTORIES})
-
-# Set up library names
-if(BUILD_SHARED_LIBS)
-  set(lib_shared_name ${PROJECT_NAME}Shared)
-  set(lib_shared_name_decorated ${lib_shared_name}${LIBNAME_ADDITION})
-  set(${PROJECT_NAME}_SHARED_LIBRARY ${lib_shared_name_decorated} CACHE STRING "name of static library for ${PROJECT_NAME}" FORCE)
-  message( STATUS "-- Building ${lib_shared_name}" )
-endif(BUILD_SHARED_LIBS)
-
-if(BUILD_STATIC_LIBS)
-  set(lib_static_name ${PROJECT_NAME}Static)
-  set(lib_static_name_decorated ${lib_static_name}${LIBNAME_ADDITION})
-  set(${PROJECT_NAME}_STATIC_LIBRARY ${lib_static_name_decorated} CACHE STRING "name of static library for ${PROJECT_NAME}" FORCE)
-  message( STATUS "-- Building ${lib_static_name}" )
-endif(BUILD_STATIC_LIBS)
-
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-
-if(BUILD_SHARED_LIBS)
-  add_library(${lib_shared_name} SHARED  ${SOURCES} ${HEADERS})
-  target_compile_features(${lib_shared_name} PUBLIC cxx_std_17)
-  set_property(TARGET ${lib_shared_name} PROPERTY VERSION "${PROJECT_VERSION}")
-  set_property(TARGET ${lib_shared_name} PROPERTY OUTPUT_NAME  "${lib_shared_name_decorated}")
-  target_include_directories(${lib_shared_name} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    ${INCLUDE_DIRECTORIES}
-  )
-  set_target_properties(${lib_shared_name} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS "ON")
-  if(UNIX)
-      #set_property(TARGET ${lib_shared_name} PROPERTY POSITION_INDEPENDENT_CODE ON)
-  endif()
-
-  # Compile Definitions
-  target_compile_definitions(${lib_shared_name} PUBLIC ${SHARED_COMPILE_DEFINITIONS})
-  # Libraries to link
-  target_link_libraries(${lib_shared_name} PUBLIC ${SHARED_LINK_LIBRARIES})
-endif()
-
-if(BUILD_STATIC_LIBS)
-  add_library(${lib_static_name} STATIC  ${SOURCES} ${HEADERS})
-  target_compile_features(${lib_static_name} PUBLIC cxx_std_17)
-  set_property(TARGET ${lib_static_name} PROPERTY VERSION "${PROJECT_VERSION}")
-  set_property(TARGET ${lib_static_name} PROPERTY OUTPUT_NAME  "${lib_static_name_decorated}")
-  target_include_directories(${lib_static_name} PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    ${INCLUDE_DIRECTORIES}
-  )
-
-  # Compile Definitions
-  target_compile_definitions(${lib_static_name} PUBLIC ${STATIC_COMPILE_DEFINITIONS})
-  # Libraries to link
-  target_link_libraries(${lib_static_name} PUBLIC ${STATIC_LINK_LIBRARIES})
-endif()
-
-if(BUILD_SHARED_LIBS)
-    SET(COMMAND_TARGET ${lib_shared_name})
-elseif(BUILD_STATIC_LIBS)
-    SET(COMMAND_TARGET ${lib_static_name})
-endif()
+target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBRARIES})
 
 # Pre build
 SET(COPY_HEADERS ${HEADERS})
 list(TRANSFORM COPY_HEADERS PREPEND "${PROJECT_SOURCE_DIR}/")
-add_custom_command(TARGET ${COMMAND_TARGET} PRE_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/third_party/Module-Manager"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/third_party/Settings-Manager"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-File-Tree-Pane"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-Filesystem-Database"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/include/"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
     COMMAND ${CMAKE_COMMAND} -E copy ${COPY_HEADERS} "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/lib/"
 )
 
 # Post build
-add_custom_command(TARGET ${COMMAND_TARGET} POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     # Make a release directory without all the cmake extras.
     # This directory can easily be archived and distributed.
     COMMAND ${CMAKE_COMMAND} -E make_directory "${RELEASE_DIR}"
     # Create release sub-folders
     COMMAND ${CMAKE_COMMAND} -E make_directory "${RELEASE_DIR}/modules/"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/resources/" "${RELEASE_DIR}/share"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${RELEASE_DIR}/resources/"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${PROJECT_SOURCE_DIR}/resources/" "${RELEASE_DIR}/resources"
 )
 
 # Installation
-if(BUILD_SHARED_LIBS)
-  message(STATUS "INSTALL: ${lib_shared_name} TO root=${CMAKE_BINARY_DIR} and current=${CMAKE_CURRENT_BINARY_DIR}")
-  install(TARGETS ${lib_shared_name}
-    RUNTIME DESTINATION "${RELEASE_DIR}/modules"
-    ARCHIVE DESTINATION "${RELEASE_DIR}/modules"
-    LIBRARY DESTINATION "${RELEASE_DIR}/modules"
-  )
-endif()
-
-if(BUILD_STATIC_LIBS)
-  install(TARGETS ${lib_static_name} EXPORT ${lib_static_name}_TARGETS
-    RUNTIME DESTINATION "${RELEASE_DIR}/lib"
-    ARCHIVE DESTINATION "${RELEASE_DIR}/lib"
-    LIBRARY DESTINATION "${RELEASE_DIR}/lib"
-  )
-endif()
-
 install(FILES ${HEADERS}
-  DESTINATION "${RELEASE_DIR}/headers"
+  DESTINATION "${CMAKE_BINARY_DIR}/include/${PROJECT_NAME}/"
 COMPONENT Headers)
 
 install(FILES "${CMAKE_SOURCE_DIR}/LICENSE" DESTINATION "${RELEASE_DIR}" RENAME "LICENSE.txt" )

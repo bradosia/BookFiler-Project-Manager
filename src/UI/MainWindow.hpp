@@ -22,12 +22,8 @@
 #include <SettingsManager/SettingsManager.hpp>
 
 // Modules
-#include <BookFiler-Module-Hocr-Editor/Interface.hpp>
-#include <BookFiler-Module-HTTP-beast/Interface.hpp>
-#include <BookFiler-Module-OCR-Tesseract/Interface.hpp>
-#include <BookFiler-Module-PDF-PoDoFo/Interface.hpp>
-#include <BookFiler-Module-Recognize/Interface.hpp>
-#include <BookFiler-Module-Recognize-Database/Interface.hpp>
+#include <BookFiler-Module-Filesystem-Database/Interface.hpp>
+#include <BookFiler-Module-File-Tree-Pane/Interface.hpp>
 
 // Local Project
 #include "ui_main.hpp"
