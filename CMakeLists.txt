@@ -7,7 +7,7 @@ set(RELEASE_DIR "${CMAKE_BINARY_DIR}/${PROJECT_NAME}/")
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${RELEASE_DIR})
 
 # Configurable Options
-OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 OPTION(BUILD_STATIC_LIBS "Build static libraries" ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -64,7 +64,8 @@ set(HEADERS ${HEADERS}
   src/UI/ui_main.hpp
   src/core/config.hpp
 
-  src/interfaces/
+  include/BookFiler-Module-Filesystem-Database/Interface.hpp
+  include/BookFiler-Module-File-Tree-Pane/Interface.hpp
 )
 
 set(RESOURCES ${RESOURCES}
@@ -99,6 +100,7 @@ elseif(UNIX)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCES})
+include_directories(${INCLUDE_DIRECTORIES})
 link_directories(${LINK_DIRECTORIES})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBRARIES})
 
@@ -111,7 +113,6 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-File-Tree-Pane"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-Filesystem-Database"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/include/"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
     COMMAND ${CMAKE_COMMAND} -E copy ${COPY_HEADERS} "${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_SOURCE_DIR}/lib/"

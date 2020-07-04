@@ -9,8 +9,8 @@ FetchContent_Populate(
     SOURCE_DIR "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-Filesystem-Database"
 )
 
-FetchContent_Populate(
-    BookFiler-Module-File-Tree-Pane
-    GIT_REPOSITORY "https://github.com/bradosia/BookFiler-Module-File-Tree-Pane.git"
-    SOURCE_DIR "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-File-Tree-Pane"
-)
+#FetchContent_Populate(
+#    BookFiler-Module-File-Tree-Pane
+#    GIT_REPOSITORY "https://github.com/bradosia/BookFiler-Module-File-Tree-Pane.git"
+#    SOURCE_DIR "${PROJECT_SOURCE_DIR}/modules/BookFiler-Module-File-Tree-Pane"
+#)
