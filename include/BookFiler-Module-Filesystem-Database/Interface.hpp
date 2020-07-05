@@ -6,8 +6,8 @@
  * @brief filesystem database and utilities
  */
 
-#ifndef BOOKFILER_FSDB_INTERFACE_H
-#define BOOKFILER_FSDB_INTERFACE_H
+#ifndef BOOKFILER_FILESYSTEM_DATABASE_INTERFACE_H
+#define BOOKFILER_FILESYSTEM_DATABASE_H
 
 // C++17
 #include <functional>
@@ -76,7 +76,7 @@ public:
 
 } // namespace filesystem
 
-class FSDB_Interface {
+class FileSystemDatabaseInterface {
 public:
   virtual void init() = 0;
   virtual void registerSettings(
@@ -107,4 +107,4 @@ public:
 } // namespace bookfiler
 
 #endif
-// end BOOKFILER_FSDB_INTERFACE_H
+// end BOOKFILER_FILESYSTEM_DATABASE_H

@@ -44,9 +44,11 @@ void MainWindow::loadModules() {
   /* Module Load
    */
   moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
-  moduleManagerPtr->addModule<bookfiler::FSDB_Interface>("bookfilerFSDBModule");
+  moduleManagerPtr->addModule<bookfiler::FileSystemDatabaseInterface>(
+      "bookfilerFSDBModule");
   moduleManagerPtr
-      ->getCallbackLoadSignal<bookfiler::FSDB_Interface>("bookfilerFSDBModule")
+      ->getCallbackLoadSignal<bookfiler::FileSystemDatabaseInterface>(
+          "bookfilerFSDBModule")
       .connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
                          std::placeholders::_1));
   moduleManagerPtr->addModule<bookfiler::FileTreePaneInterface>(
@@ -65,7 +67,7 @@ void MainWindow::loadModules() {
 }
 
 void MainWindow::FSDB_ModuleLoaded(
-    std::shared_ptr<bookfiler::FSDB_Interface> module) {
+    std::shared_ptr<bookfiler::FileSystemDatabaseInterface> module) {
   std::cout << "MainWindow::FSDB_ModuleLoaded()" << std::endl;
   FSDB_Module = module;
 }
@@ -91,38 +93,35 @@ void MainWindow::fileTreePaneModuleLoaded(
   /* get widget
    */
   std::cout << "hocrEditModule->getWidget()" << std::endl;
-  fileTreePaneWidget = fileTreePaneModule->getWidget();
+  fileTreePaneWidgetList = fileTreePaneModule->newWidget();
+  fileTreePaneWidgetMain = fileTreePaneModule->newWidget();
   std::cout << "std::make_shared<RenderWidget>()" << std::endl;
-  renderWidget = std::make_shared<RenderWidget>();
-  renderWidget->renderFunction =
-      std::bind(&bookfiler::FileTreePaneWidget::render, fileTreePaneWidget,
+  renderWidgetList = std::make_shared<RenderWidget>();
+  renderWidgetMain = std::make_shared<RenderWidget>();
+  renderWidgetList->renderFunction =
+      std::bind(&bookfiler::FileTreePaneWidget::render, fileTreePaneWidgetList,
                 std::placeholders::_1);
-  renderWidget->initGraphicsFunction =
+  renderWidgetList->initGraphicsFunction =
       std::bind(&bookfiler::FileTreePaneWidget::initGraphics,
-                fileTreePaneWidget, std::placeholders::_1);
+                fileTreePaneWidgetList, std::placeholders::_1);
+  renderWidgetMain->renderFunction =
+      std::bind(&bookfiler::FileTreePaneWidget::render, fileTreePaneWidgetMain,
+                std::placeholders::_1);
+  renderWidgetMain->initGraphicsFunction =
+      std::bind(&bookfiler::FileTreePaneWidget::initGraphics,
+                fileTreePaneWidgetMain, std::placeholders::_1);
   // renderWidget->renderFunction();
   // needed to prevent crashing on program exit
-  centralQWidgetPtrs.push_back(renderWidget);
+  centralQWidgetPtrs.push_back(renderWidgetList);
+  centralQWidgetPtrs.push_back(renderWidgetMain);
   // TODO: Check if widgets need to be added on paint cycles
-  QSizePolicy policy = renderWidget->sizePolicy();
+  QSizePolicy policy = renderWidgetMain->sizePolicy();
   policy.setHorizontalStretch(2);
-  renderWidget->setSizePolicy(policy);
-  ui->horizontalSplitter->addWidget(renderWidget.get());
+  renderWidgetMain->setSizePolicy(policy);
+  ui->horizontalSplitter->addWidget(renderWidgetMain.get());
 }
 
 void MainWindow::allModulesLoaded() {
-  // Module Hookup
-  recognizeModule->setOcrModule(ocrModule);
-  recognizeModule->setPdfModule(pdfModule);
-  recognizeModel = recognizeModule->newModel();
-  /* SIGNALS AND SLOTS HOOKUP
-   */
-  ui->filesSelectedSignal.connect(
-      std::bind(&bookfiler::RecognizeModel::addPaths, recognizeModel.get(),
-                std::placeholders::_1));
-  ui->listItemActivatedSignal.connect(
-      std::bind(&bookfiler::RecognizeModel::requestRecognize,
-                recognizeModel.get(), std::placeholders::_1));
   /* Get the settings
    */
   settingsManagerPtr->deployFile(SETTINGS_FILE);
@@ -134,7 +133,8 @@ void MainWindow::allModulesLoaded() {
           &Ui::main::selectFiles);
   connect(ui->listWidget, &QListWidget::itemDoubleClicked, ui.get(),
           &Ui::main::listItemActivated);
-  recognizeModel->imageUpdateSignal.connect(fileTreePaneWidget->setImageSlot);
-  recognizeModel->textUpdateSignal.connect(fileTreePaneWidget->textUpdateSlot);
-  fileTreePaneWidget->updateSignal.connect(renderWidget->updateSlot);
+
+  fileTreePaneWidgetList->viewTreeDataSlot;
+  fileTreePaneWidgetList->viewTreeJsonSlot;
+  //fileTreePaneWidgetList->getDirectorySignal;
 }
