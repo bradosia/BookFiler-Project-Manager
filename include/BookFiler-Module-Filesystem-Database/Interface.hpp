@@ -6,10 +6,10 @@
  * @brief filesystem database and utilities
  */
 
-#ifndef FSDB_INTERFACE_H
-#define FSDB_INTERFACE_H
+#ifndef BOOKFILER_FSDB_INTERFACE_H
+#define BOOKFILER_FSDB_INTERFACE_H
 
-// c++17
+// C++17
 #include <functional>
 #include <memory>
 #include <string>
@@ -23,14 +23,14 @@
 #include <rapidjson/stringbuffer.h>
 
 /*
- * FSDB
+ * bookfiler = BookFiler™
  */
-namespace FSDB {
+namespace bookfiler {
 
 namespace filesystem {
 
-#ifndef FSDB_FILE_TABLE_INCLUDE_H
-#define FSDB_FILE_TABLE_INCLUDE_H
+#ifndef BOOKFILER_FSDB_FILE_TABLE_INCLUDE_H
+#define BOOKFILER_FSDB_FILE_TABLE_INCLUDE_H
 enum class FileTableRowFlags {
   expanded = 1,
   collapsed = 0,
@@ -52,7 +52,7 @@ public:
   std::unordered_map<int, std::shared_ptr<FileTableRow>> table;
   std::shared_ptr<FileTableRow> getRow(int row) { return table.at(row); }
 };
-#endif // FSDB_FILE_TABLE_INCLUDE_H
+#endif // BOOKFILER_FSDB_FILE_TABLE_INCLUDE_H
 
 #ifndef FSDB_FILESYSTEM_SIGNAL_INCLUDE_H
 #define FSDB_FILESYSTEM_SIGNAL_INCLUDE_H
@@ -74,9 +74,9 @@ public:
 };
 #endif // FSDB_FILESYSTEM_SIGNAL_INCLUDE_H
 
-}
+} // namespace filesystem
 
-class ModuleInterface {
+class FSDB_Interface {
 public:
   virtual void init() = 0;
   virtual void registerSettings(
@@ -104,7 +104,7 @@ public:
   virtual bool watchSignal(int, std::string) = 0;
 };
 
-} // namespace FSDB
+} // namespace bookfiler
 
 #endif
-// end FSDB_INTERFACE_H
+// end BOOKFILER_FSDB_INTERFACE_H

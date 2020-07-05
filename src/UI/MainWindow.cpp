@@ -9,6 +9,7 @@
  */
 
 // C++
+#include <functional>
 #include <thread>
 
 // Local Project
@@ -33,33 +34,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   // std::thread loadModulesThread(&MainWindow::loadModules, this);
   // loadModulesThread.join();
   loadModules();
-
-  // TODO: Thread these
-  if (hocrEditModule) {
-    std::cout << "hocrEditModule->getWidget()" << std::endl;
-    hocrEditWidget = hocrEditModule->getWidget();
-    std::cout << "std::make_shared<RenderWidget>()" << std::endl;
-    renderWidget = std::make_shared<RenderWidget>();
-    renderWidget->renderFunction =
-        std::bind(&hocrEditModule::HocrEditWidget::render, hocrEditWidget,
-                  std::placeholders::_1);
-    renderWidget->initGraphicsFunction =
-        std::bind(&hocrEditModule::HocrEditWidget::initGraphics, hocrEditWidget,
-                  std::placeholders::_1);
-    // renderWidget->renderFunction();
-    // needed to prevent crashing on program exit
-    centralQWidgetPtrs.push_back(renderWidget);
-  }
-  hocrEditModuleLoaded();
-  recognizeModuleLoaded();
-
-  // TODO: Check if widgets need to be added on paint cycles
-  if (hocrEditModule) {
-    QSizePolicy policy = renderWidget->sizePolicy();
-    policy.setHorizontalStretch(2);
-    renderWidget->setSizePolicy(policy);
-    ui->horizontalSplitter->addWidget(renderWidget.get());
-  }
 }
 
 void MainWindow::loadModules() {
@@ -70,75 +44,70 @@ void MainWindow::loadModules() {
   /* Module Load
    */
   moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
-  moduleManagerPtr->addModuleInterface<hocrEditModule::ModuleInterface>(
-      "hocrEditModule");
-  moduleManagerPtr->addModuleInterface<bookfiler::RecognizeInterface>(
-      "bookfilerRecognizeModule");
-  moduleManagerPtr->addModuleInterface<bookfiler::Http>("bookfilerHttpModule");
-  moduleManagerPtr->addModuleInterface<bookfiler::OcrInterface>(
-      "bookfilerOcrModule");
-  moduleManagerPtr->addModuleInterface<bookfiler::PdfInterface>(
-      "bookfilerPdfModule");
-  moduleManagerPtr->addModuleInterface<bookfiler::OcrDatabaseInterface>(
-      "textRecognizeDatabaseModule");
+  moduleManagerPtr->addModule<bookfiler::FSDB_Interface>("bookfilerFSDBModule");
+  moduleManagerPtr
+      ->getCallbackLoadSignal<bookfiler::FSDB_Interface>("bookfilerFSDBModule")
+      .connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
+                         std::placeholders::_1));
+  moduleManagerPtr->addModule<bookfiler::FileTreePaneInterface>(
+      "bookfilerFileTreePaneModule");
+  moduleManagerPtr
+      ->getCallbackLoadSignal<bookfiler::FileTreePaneInterface>(
+          "bookfilerFileTreePaneModule")
+      .connect(std::bind(&MainWindow::fileTreePaneModuleLoaded, this,
+                         std::placeholders::_1));
+  moduleManagerPtr->callbackLoadAllSignal.connect(
+      std::bind(&MainWindow::allModulesLoaded, this));
   moduleManagerPtr->loadModules("modules");
-  std::cout << "getModule<hocrEditModule::ModuleInterface>" << std::endl;
-  hocrEditModule = moduleManagerPtr->getModule<hocrEditModule::ModuleInterface>(
-      "hocrEditModule");
-  std::cout << "getModule<bookfiler::RecognizeInterface>" << std::endl;
-  recognizeModule = moduleManagerPtr->getModule<bookfiler::RecognizeInterface>(
-      "bookfilerRecognizeModule");
-  std::cout << "getModule<bookfiler::Http>" << std::endl;
-  httpModule =
-      moduleManagerPtr->getModule<bookfiler::Http>("bookfilerHttpModule");
-  std::cout << "getModule<bookfiler::OcrInterface>" << std::endl;
-  ocrModule = moduleManagerPtr->getModule<bookfiler::OcrInterface>(
-      "bookfilerOcrModule");
-  std::cout << "getModule<bookfiler::PdfInterface>" << std::endl;
-  pdfModule = moduleManagerPtr->getModule<bookfiler::PdfInterface>(
-      "bookfilerPdfModule");
-  std::cout << "getModule<bookfiler::OcrDatabaseInterface>" << std::endl;
-  recognizeDatabaseModule =
-      moduleManagerPtr->getModule<bookfiler::OcrDatabaseInterface>(
-          "textRecognizeDatabaseModule");
 #if MAIN_WINDOW_DEBUG
   std::cout << "MainWindow::loadModules() END\n";
 #endif
 }
 
-void MainWindow::hocrEditModuleLoaded() {
-  if (hocrEditModule) {
-    std::cout << "MainWindow::hocrEditModuleLoaded()" << std::endl;
-    /* register widgets
-     */
-    hocrEditModule->init();
-    /* register setting deploy
-     */
-    std::shared_ptr<rapidjson::Document> moduleRequest =
-        std::make_shared<rapidjson::Document>();
-    std::shared_ptr<std::unordered_map<
-        std::string, std::function<void(std::shared_ptr<rapidjson::Document>)>>>
-        moduleCallbackMap = std::make_shared<std::unordered_map<
-            std::string,
-            std::function<void(std::shared_ptr<rapidjson::Document>)>>>();
-    hocrEditModule->registerSettings(moduleRequest, moduleCallbackMap);
-    settingsManagerPtr->merge(moduleRequest, moduleCallbackMap);
-    // Did all modules load yet?
-    modulesLoadedNum += 5;
-    if (modulesLoadedNum == modulesLoadedTotalNum) {
-      allModulesLoaded();
-    }
-  }
+void MainWindow::FSDB_ModuleLoaded(
+    std::shared_ptr<bookfiler::FSDB_Interface> module) {
+  std::cout << "MainWindow::FSDB_ModuleLoaded()" << std::endl;
+  FSDB_Module = module;
 }
 
-void MainWindow::recognizeModuleLoaded() {
-  if (recognizeModule) {
-    // Did all modules load yet?
-    modulesLoadedNum++;
-    if (modulesLoadedNum == modulesLoadedTotalNum) {
-      allModulesLoaded();
-    }
-  }
+void MainWindow::fileTreePaneModuleLoaded(
+    std::shared_ptr<bookfiler::FileTreePaneInterface> module) {
+  std::cout << "MainWindow::fileTreePaneModuleLoaded()" << std::endl;
+  fileTreePaneModule = module;
+  /* register widgets
+   */
+  fileTreePaneModule->init();
+  /* register setting deploy
+   */
+  std::shared_ptr<rapidjson::Document> moduleRequest =
+      std::make_shared<rapidjson::Document>();
+  std::shared_ptr<std::unordered_map<
+      std::string, std::function<void(std::shared_ptr<rapidjson::Document>)>>>
+      moduleCallbackMap = std::make_shared<std::unordered_map<
+          std::string,
+          std::function<void(std::shared_ptr<rapidjson::Document>)>>>();
+  fileTreePaneModule->registerSettings(moduleRequest, moduleCallbackMap);
+  settingsManagerPtr->merge(moduleRequest, moduleCallbackMap);
+  /* get widget
+   */
+  std::cout << "hocrEditModule->getWidget()" << std::endl;
+  fileTreePaneWidget = fileTreePaneModule->getWidget();
+  std::cout << "std::make_shared<RenderWidget>()" << std::endl;
+  renderWidget = std::make_shared<RenderWidget>();
+  renderWidget->renderFunction =
+      std::bind(&bookfiler::FileTreePaneWidget::render, fileTreePaneWidget,
+                std::placeholders::_1);
+  renderWidget->initGraphicsFunction =
+      std::bind(&bookfiler::FileTreePaneWidget::initGraphics,
+                fileTreePaneWidget, std::placeholders::_1);
+  // renderWidget->renderFunction();
+  // needed to prevent crashing on program exit
+  centralQWidgetPtrs.push_back(renderWidget);
+  // TODO: Check if widgets need to be added on paint cycles
+  QSizePolicy policy = renderWidget->sizePolicy();
+  policy.setHorizontalStretch(2);
+  renderWidget->setSizePolicy(policy);
+  ui->horizontalSplitter->addWidget(renderWidget.get());
 }
 
 void MainWindow::allModulesLoaded() {
@@ -165,7 +134,7 @@ void MainWindow::allModulesLoaded() {
           &Ui::main::selectFiles);
   connect(ui->listWidget, &QListWidget::itemDoubleClicked, ui.get(),
           &Ui::main::listItemActivated);
-  recognizeModel->imageUpdateSignal.connect(hocrEditWidget->setImageSlot);
-  recognizeModel->textUpdateSignal.connect(hocrEditWidget->textUpdateSlot);
-  hocrEditWidget->updateSignal.connect(renderWidget->updateSlot);
+  recognizeModel->imageUpdateSignal.connect(fileTreePaneWidget->setImageSlot);
+  recognizeModel->textUpdateSignal.connect(fileTreePaneWidget->textUpdateSlot);
+  fileTreePaneWidget->updateSignal.connect(renderWidget->updateSlot);
 }

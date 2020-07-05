@@ -40,25 +40,20 @@ public:
       }
   };
   void loadModules();
-  void hocrEditModuleLoaded();
-  void recognizeModuleLoaded();
+  void FSDB_ModuleLoaded(std::shared_ptr<bookfiler::FSDB_Interface>);
+  void fileTreePaneModuleLoaded(std::shared_ptr<bookfiler::FileTreePaneInterface>);
   void allModulesLoaded();
 
 private:
   unsigned int modulesLoadedNum;
   unsigned int modulesLoadedTotalNum;
   std::unique_ptr<Ui::main> ui;
-  std::shared_ptr<hocrEditModule::ModuleInterface> hocrEditModule;
-  std::shared_ptr<bookfiler::RecognizeInterface> recognizeModule;
-  std::shared_ptr<bookfiler::Http> httpModule;
-  std::shared_ptr<bookfiler::OcrInterface> ocrModule;
-  std::shared_ptr<bookfiler::PdfInterface> pdfModule;
-  std::shared_ptr<bookfiler::OcrDatabaseInterface> recognizeDatabaseModule;
+  std::shared_ptr<bookfiler::FSDB_Interface> FSDB_Module;
+  std::shared_ptr<bookfiler::FileTreePaneInterface> fileTreePaneModule;
   std::vector<std::shared_ptr<QWidget>> centralQWidgetPtrs;
   std::shared_ptr<bradosia::ModuleManager> moduleManagerPtr;
   std::shared_ptr<bradosia::SettingsManager> settingsManagerPtr;
-  std::shared_ptr<hocrEditModule::HocrEditWidget> hocrEditWidget;
+  std::shared_ptr<bookfiler::FileTreePaneWidget> fileTreePaneWidget;
   std::shared_ptr<RenderWidget> renderWidget;
-  std::shared_ptr<bookfiler::RecognizeModel> recognizeModel;
 };
 #endif // MAIN_WINDOW_H
