@@ -50,8 +50,12 @@ if(NOT ${SettingsManager})
     add_subdirectory(third_party/Settings-Manager)
 endif()
 add_subdirectory(modules/)
-add_subdirectory(modules/BookFiler-Module-File-Tree-Pane)
-add_subdirectory(modules/BookFiler-Module-Filesystem-Database)
+if(NOT ${BookFilerModuleFileTreePane})
+    add_subdirectory(modules/BookFiler-Module-File-Tree-Pane)
+endif()
+if(NOT ${BookFilerModuleFilesystemDatabase})
+    add_subdirectory(modules/BookFiler-Module-Filesystem-Database)
+endif()
 
 set(SOURCES ${SOURCES}
   src/UI/main.cpp
