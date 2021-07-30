@@ -19,7 +19,7 @@ A decentralized project management system for real estate management and account
 ## Mingw64
 
 ```shell
-pacman -S mingw-w64-x86_64-libgit2
+pacman -S mingw-w64-x86_64-libgit2 mingw-w64-x86_64-qt5
 mkdir build
 cd build
 cmake -G "MSYS Makefiles" ../

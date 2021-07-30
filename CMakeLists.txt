@@ -43,8 +43,12 @@ set(LINK_DIRECTORIES
 
 # MODULES
 add_subdirectory(third_party)
-add_subdirectory(third_party/Module-Manager)
-add_subdirectory(third_party/Settings-Manager)
+if(NOT ${ModuleManager})
+    add_subdirectory(third_party/Module-Manager)
+endif()
+if(NOT ${SettingsManager})
+    add_subdirectory(third_party/Settings-Manager)
+endif()
 add_subdirectory(modules/)
 add_subdirectory(modules/BookFiler-Module-File-Tree-Pane)
 add_subdirectory(modules/BookFiler-Module-Filesystem-Database)

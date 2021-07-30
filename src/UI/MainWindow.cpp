@@ -46,20 +46,20 @@ void MainWindow::loadModules() {
   moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
   moduleManagerPtr->addModule<bookfiler::FileSystemDatabaseInterface>(
       "bookfilerFSDBModule");
-  moduleManagerPtr
+  /*moduleManagerPtr
       ->getCallbackLoadSignal<bookfiler::FileSystemDatabaseInterface>(
           "bookfilerFSDBModule")
-      .connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
-                         std::placeholders::_1));
+      ->connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
+                         std::placeholders::_1));*/
   moduleManagerPtr->addModule<bookfiler::FileTreePaneInterface>(
       "bookfilerFileTreePaneModule");
-  moduleManagerPtr
+  /*moduleManagerPtr
       ->getCallbackLoadSignal<bookfiler::FileTreePaneInterface>(
           "bookfilerFileTreePaneModule")
-      .connect(std::bind(&MainWindow::fileTreePaneModuleLoaded, this,
-                         std::placeholders::_1));
-  moduleManagerPtr->callbackLoadAllSignal.connect(
-      std::bind(&MainWindow::allModulesLoaded, this));
+      ->connect(std::bind(&MainWindow::fileTreePaneModuleLoaded, this,
+                         std::placeholders::_1));*/
+  /*moduleManagerPtr->callbackLoadAllSignal.connect(
+      std::bind(&MainWindow::allModulesLoaded, this));*/
   moduleManagerPtr->loadModules("modules");
 #if MAIN_WINDOW_DEBUG
   std::cout << "MainWindow::loadModules() END\n";

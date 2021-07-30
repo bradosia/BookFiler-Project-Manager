@@ -104,7 +104,7 @@ public:
    * signal.connect(slot);
    *
    * Do not need to pass a callback since slots may activate signals of their
-   * own
+   * own.
    */
   boost::signals2::signal<void()> getDirectorySignal;
 };
