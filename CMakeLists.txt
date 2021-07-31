@@ -41,21 +41,9 @@ set(LINK_DIRECTORIES
    third_party/Settings-Manager/lib/
 )
 
-# MODULES
+# THIRD_PARTY & MODULES
 add_subdirectory(third_party)
-if(NOT ${ModuleManager})
-    add_subdirectory(third_party/Module-Manager)
-endif()
-if(NOT ${SettingsManager})
-    add_subdirectory(third_party/Settings-Manager)
-endif()
-add_subdirectory(modules/)
-if(NOT ${BookFilerModuleFileTreePane})
-    add_subdirectory(modules/BookFiler-Module-File-Tree-Pane)
-endif()
-if(NOT ${BookFilerModuleFilesystemDatabase})
-    add_subdirectory(modules/BookFiler-Module-Filesystem-Database)
-endif()
+add_subdirectory(modules)
 
 set(SOURCES ${SOURCES}
   src/UI/main.cpp
