@@ -46,11 +46,11 @@ void MainWindow::loadModules() {
   moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
   moduleManagerPtr->addModule<bookfiler::FileSystemDatabaseInterface>(
       "bookfilerFSDBModule");
-  /*moduleManagerPtr
+  moduleManagerPtr
       ->getCallbackLoadSignal<bookfiler::FileSystemDatabaseInterface>(
-          "bookfilerFSDBModule")
+          "bookfilerHttpModule")
       ->connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
-                         std::placeholders::_1));*/
+                          std::placeholders::_1));
   moduleManagerPtr->addModule<bookfiler::FileTreePaneInterface>(
       "bookfilerFileTreePaneModule");
   /*moduleManagerPtr
@@ -136,5 +136,5 @@ void MainWindow::allModulesLoaded() {
 
   fileTreePaneWidgetList->viewTreeDataSlot;
   fileTreePaneWidgetList->viewTreeJsonSlot;
-  //fileTreePaneWidgetList->getDirectorySignal;
+  // fileTreePaneWidgetList->getDirectorySignal;
 }

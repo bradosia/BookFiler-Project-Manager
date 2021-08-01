@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.4)
 # The FetchModule is only available since CMake 3.11.
+# FetchContent_MakeAvailable since CMake 3.14.
 
 set(PROJECT_NAME BookFiler-Project-Manager)
 project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES CXX)
