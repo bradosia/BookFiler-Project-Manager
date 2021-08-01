@@ -15,6 +15,12 @@
 // Local Project
 #include "MainWindow.hpp"
 
+int callbackTest(
+    std::shared_ptr<bookfiler::FileSystemDatabaseInterface> module_) {
+  std::cout << "---------------CALLBACK TEST\n";
+  return 0;
+}
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   /* UI Setup
    */
@@ -45,34 +51,35 @@ void MainWindow::loadModules() {
    */
   moduleManagerPtr = std::make_shared<bradosia::ModuleManager>();
   moduleManagerPtr->addModule<bookfiler::FileSystemDatabaseInterface>(
-      "bookfilerFSDBModule");
+      "bookfilerFilesystemDatabaseModule");
   moduleManagerPtr
       ->getCallbackLoadSignal<bookfiler::FileSystemDatabaseInterface>(
-          "bookfilerHttpModule")
+          "bookfilerFilesystemDatabaseModule")
       ->connect(std::bind(&MainWindow::FSDB_ModuleLoaded, this,
                           std::placeholders::_1));
   moduleManagerPtr->addModule<bookfiler::FileTreePaneInterface>(
       "bookfilerFileTreePaneModule");
-  /*moduleManagerPtr
+  moduleManagerPtr
       ->getCallbackLoadSignal<bookfiler::FileTreePaneInterface>(
           "bookfilerFileTreePaneModule")
       ->connect(std::bind(&MainWindow::fileTreePaneModuleLoaded, this,
-                         std::placeholders::_1));*/
-  /*moduleManagerPtr->callbackLoadAllSignal.connect(
-      std::bind(&MainWindow::allModulesLoaded, this));*/
+                          std::placeholders::_1));
+  moduleManagerPtr->callbackLoadAllSignal.connect(
+      std::bind(&MainWindow::allModulesLoaded, this));
   moduleManagerPtr->loadModules("modules");
 #if MAIN_WINDOW_DEBUG
   std::cout << "MainWindow::loadModules() END\n";
 #endif
 }
 
-void MainWindow::FSDB_ModuleLoaded(
-    std::shared_ptr<bookfiler::FileSystemDatabaseInterface> module) {
+int MainWindow::FSDB_ModuleLoaded(
+    std::shared_ptr<bookfiler::FileSystemDatabaseInterface> module_) {
   std::cout << "MainWindow::FSDB_ModuleLoaded()" << std::endl;
-  FSDB_Module = module;
+  FSDB_Module = module_;
+  return 0;
 }
 
-void MainWindow::fileTreePaneModuleLoaded(
+int MainWindow::fileTreePaneModuleLoaded(
     std::shared_ptr<bookfiler::FileTreePaneInterface> module) {
   std::cout << "MainWindow::fileTreePaneModuleLoaded()" << std::endl;
   fileTreePaneModule = module;
@@ -119,9 +126,10 @@ void MainWindow::fileTreePaneModuleLoaded(
   policy.setHorizontalStretch(2);
   renderWidgetMain->setSizePolicy(policy);
   ui->horizontalSplitter->addWidget(renderWidgetMain.get());
+  return 0;
 }
 
-void MainWindow::allModulesLoaded() {
+int MainWindow::allModulesLoaded() {
   /* Get the settings
    */
   settingsManagerPtr->deployFile(SETTINGS_FILE);
@@ -137,4 +145,5 @@ void MainWindow::allModulesLoaded() {
   fileTreePaneWidgetList->viewTreeDataSlot;
   fileTreePaneWidgetList->viewTreeJsonSlot;
   // fileTreePaneWidgetList->getDirectorySignal;
+  return 0;
 }

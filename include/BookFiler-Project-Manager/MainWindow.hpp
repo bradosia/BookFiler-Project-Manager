@@ -40,11 +40,11 @@ public:
     }
   };
   void loadModules();
-  void FSDB_ModuleLoaded(
+  int FSDB_ModuleLoaded(
       std::shared_ptr<bookfiler::FileSystemDatabaseInterface>);
-  void fileTreePaneModuleLoaded(
+  int fileTreePaneModuleLoaded(
       std::shared_ptr<bookfiler::FileTreePaneInterface>);
-  void allModulesLoaded();
+  int allModulesLoaded();
 
 private:
   unsigned int modulesLoadedNum;
